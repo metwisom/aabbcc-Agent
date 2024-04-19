@@ -1,0 +1,40 @@
+server: http://127.0.0.1:45214
+time: 0s
+aspects:
+  - name: TotalRam
+    type: parser
+    path: /proc/meminfo
+    pattern: 'MemTotal: *(\d*) kB'
+    delay: 0s
+  - name: FreeRam
+    type: parser
+    path: /proc/meminfo
+    pattern: 'MemFree: *(\d*) kB'
+    delay: 1s
+  - name: AvailableRam
+    type: parser
+    path: /proc/meminfo
+    pattern: 'MemAvailable: *(\d*) kB'
+    delay: 1s
+  - name: AvailableRam
+    type: secret
+    path: /proc/meminfo
+    pattern: 'MemAvailable: *(\d*) kB'
+    delay: 1s
+  - name: Avg1M
+    type: parser
+    path: /proc/loadavg
+    pattern: '(\d*.\d*) .*'
+    delay: 5s
+  - name: Avg5M
+    type: parser
+    path: /proc/loadavg
+    pattern: '\d*.\d* (\d*.\d*) .*'
+    delay: 5s
+  - name: Avg15M
+    type: parser
+    path: /proc/loadavg
+    pattern: '\d*.\d* \d*.\d* (\d*.\d*) .*'
+    delay: 5s
+
+
