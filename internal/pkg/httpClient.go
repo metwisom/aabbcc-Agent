@@ -9,19 +9,25 @@ import (
 )
 
 type HttpClient struct {
-	host string
+	host  string
+	token string
 }
 
 func (h *HttpClient) SetHost(host string) {
 	h.host = host
 }
 
-func (h *HttpClient) SendAspect(data *AspectFragment) {
-	h.send(data)
+func (h *HttpClient) SetToken(token string) {
+	h.token = token
 }
 
-func (h *HttpClient) send(data any) (err error) {
-	jsonData, err := json.MarshalIndent(&data, "", "\t")
+func (h *HttpClient) SendAspect(data []AspectFragment) {
+	items := map[string]interface{}{"items": &data}
+	h.send(items)
+}
+
+func (h *HttpClient) send(data map[string]interface{}) (err error) {
+	jsonData, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
 		return err
 	}
@@ -32,12 +38,20 @@ func (h *HttpClient) send(data any) (err error) {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", h.token)
 
 	client := http.Client{
 		Timeout: 30 * time.Second,
 	}
 
-	_, err = client.Do(req)
+	var response *http.Response
+	response, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	client.CloseIdleConnections()
+	err = response.Body.Close()
 	if err != nil {
 		return err
 	}

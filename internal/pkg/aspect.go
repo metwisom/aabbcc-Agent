@@ -9,12 +9,6 @@ import (
 	"time"
 )
 
-type AspectFragment struct {
-	Aspect string    `json:"aspect"`
-	Value  string    `json:"value"`
-	Time   time.Time `json:"time"`
-}
-
 type Aspect struct {
 	Name     string        `yaml:"name"`
 	Type     string        `yaml:"type"`

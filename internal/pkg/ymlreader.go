@@ -1,25 +1,26 @@
 package pkg
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v2"
-	"log"
 	"os"
 )
 
 type Config struct {
-	Server  string    `yaml:"server"`
-	Aspects []*Aspect `yaml:"aspects"`
+	Server  string     `yaml:"server"`
+	Token   string     `yaml:"token"`
+	Aspects AspectList `yaml:"aspect"`
 }
 
 func (c *Config) GetConf() *Config {
 
-	yamlFile, err := os.ReadFile("aspect.yaml")
-	if err != nil {
-		log.Printf("yamlFile.Get err   #%v ", err)
-	}
-	err = yaml.Unmarshal(yamlFile, c)
-	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
+	if yamlFile, err := os.ReadFile("aspect.yaml"); err != nil {
+		panic(fmt.Sprintf("yamlFile.Get err   #%v ", err))
+	} else {
+		err := yaml.Unmarshal(yamlFile, c)
+		if err != nil {
+			panic(fmt.Sprintf("Unmarshal: %v", err))
+		}
 	}
 
 	return c

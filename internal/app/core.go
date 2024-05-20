@@ -2,14 +2,11 @@ package app
 
 import (
 	"aabbcc-Agent/internal/pkg"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
-
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
 
 func Run() {
 	var c pkg.Config
@@ -18,19 +15,21 @@ func Run() {
 	var httpClient = pkg.HttpClient{}
 	httpClient.SetHost(c.Server)
 
-	for {
-
-		for _, aspect := range c.Aspects {
-			if aspect.NextTime.Before(time.Now()) || aspect.NextTime.IsZero() {
-				fragment, err := aspect.FetchData()
-				if err != nil {
-					//fmt.Println("some error: " + err.Error())
-				} else {
-					httpClient.SendAspect(fragment)
+	go func() {
+		for {
+			fragments := make([]pkg.AspectFragment, 0)
+			c.Aspects.Each(func(fragment *pkg.AspectFragment, err error) {
+				if fragment != nil {
+					fragments = append(fragments, *fragment)
 				}
-			}
-
+			})
+			httpClient.SendAspect(fragments)
+			time.Sleep(time.Millisecond * 1000)
 		}
-		time.Sleep(time.Millisecond * 1)
-	}
+	}()
+
+	stopChan := make(chan os.Signal, 1)
+	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
+	<-stopChan
+
 }
